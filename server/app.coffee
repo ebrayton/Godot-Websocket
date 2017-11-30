@@ -20,20 +20,19 @@ app.use express.static PUBLIC
 
 wss.on 'connection', (ws) ->
     console.log 'Connected ' + ws.upgradeReq.url
-    
+
     ws.onmessage = (event) ->
         console.log event.data
-    
+
     ws.onerror = (error) ->
         console.log error
-    
+
     ws.send 'Logged'
 
 
 server.listen PORT, process.env.IP || "0.0.0.0", () ->
     console.log "Server started"
-    
-    
+
 
 _on_time = () ->
     msg = new Date().toString()
