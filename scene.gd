@@ -1,33 +1,28 @@
-
 extends Node
 
-#var peer = StreamPeerTCP.new()
+# Set some variables up
 var websocket
+var message = ''
 
-var run_time = 0
-
-func _process(delta):
-	#print(peer.is_connected())
-	#print(peer.get_status())
-	run_time += delta
-	get_node("time").set_text(str(run_time).pad_decimals(2))
 
 func _ready():
-	#peer.connect('127.0.0.1',3001)
-	
 	set_process(true)
-	
-	print( get_tree() )
-	
-	websocket = preload('websocket.gd').new(self)
-	websocket.start('godot-websocket-tutorial-marcosbitetti.c9users.io',80)
+
+	websocket = preload('res://websocket.gd').new(self)
+	websocket.start('echo.websocket.org', 80)
 	websocket.set_receiver(self, '_on_message_received')
+
+
+func _process(delta):
+	get_node('message').set_text('Server says: "' + str(message) + '"' if message else '')
 
 
 func _on_message_received(msg):
 	print(msg)
+	message = msg
 
 
 func _on_button_pressed():
-	websocket.send("Hi server")
+	message = ''
+	websocket.send('Hi server')
 	print('cl')

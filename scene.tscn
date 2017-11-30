@@ -22,7 +22,7 @@ shortcut = null
 text = "send message"
 flat = false
 
-[node name="time" type="Label" parent="."]
+[node name="message" type="Label" parent="."]
 
 focus/ignore_mouse = true
 focus/stop_mouse = true

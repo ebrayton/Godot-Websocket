@@ -37,7 +37,7 @@ func _run(_self):
 		if get_status() == STATUS_CONNECTED:
 			break
 		tm += 0.1
-		if tm>TIMEOUT:
+		if tm > TIMEOUT:
 			error = 'Connection timeout'
 			return
 		OS.delay_msec(100)
@@ -81,7 +81,7 @@ func _run(_self):
 
 		OS.delay_msec(100)
 		tm += 0.1
-		if tm>TIMEOUT:
+		if tm > TIMEOUT:
 			print('timeout')
 			return
 	#print(data)
@@ -231,7 +231,7 @@ func _init(reference).():
 
 func _mask(_m, _d):
 	_m = int_to_hex(_m)
-	_d=_d.to_utf8()
+	_d = _d.to_utf8()
 	var ret = []
 	for i in range(_d.size()):
 		ret.append(_d[i] ^ _m[i % 4])
