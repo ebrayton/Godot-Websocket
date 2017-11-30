@@ -1,4 +1,14 @@
 # Godot-Websocket
+
+**Tasks:**
+- [x] Conform style (admittedly, to my own "standard")
+- [x] Organize project folders
+- [x] Simplify server index.html to be more generally useable
+- [ ] Experiment with `wss://` (secure websocket) protocol (currently supports `ws://`)
+
+---
+
+## README from [upstream](https://github.com/marcosbitetti/Godot-Websocket)
 **A full GDScript Websocket implementation**
 
 I make it for my personal experiments, but it shows useful for other game developers.
