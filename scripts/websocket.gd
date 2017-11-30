@@ -60,7 +60,8 @@ func _run(_self):
 	header += "Accept-Encoding: gzip, deflate, sdch\r\n"
 	header += "Accept-Language: "+str(OS.get_locale())+";q=0.8,en-US;q=0.6,en;q=0.4\r\n"
 	#header += "Sec-WebSocket-Key: "+send_secure+"\r\n"
-	header += "Sec-WebSocket-Key: 6Aw8vTgcG5EvXdQywVvbh_3fMxvd4Q7dcL2caAHAFjV\r\n"
+	# header += "Sec-WebSocket-Key: 6Aw8vTgcG5EvXdQywVvbh_3fMxvd4Q7dcL2caAHAFjV\r\n"
+	header += "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
 	header += "Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits\r\n"
 	header += "\r\n"
 	#print(header)
@@ -91,6 +92,7 @@ func _run(_self):
 		if lin.find("HTTP/1.1 101") > -1:
 			connection_ok = true
 		# other headers can be checked here
+	print(data)
 
 	if not connection_ok:
 		#print(data)

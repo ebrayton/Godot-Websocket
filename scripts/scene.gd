@@ -8,7 +8,7 @@ var message = ''
 func _ready():
 	set_process(true)
 
-	websocket = preload('res://websocket.gd').new(self)
+	websocket = preload('res://scripts/websocket.gd').new(self)
 	websocket.start('echo.websocket.org', 80)
 	websocket.set_receiver(self, '_on_message_received')
 
