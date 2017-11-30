@@ -21,15 +21,13 @@ func _ready():
 	
 	websocket = preload('websocket.gd').new(self)
 	websocket.start('godot-websocket-tutorial-marcosbitetti.c9users.io',80)
-	websocket.set_reciever(self,'_on_message_recieved')
+	websocket.set_receiver(self, '_on_message_received')
 
-func _on_message_recieved(msg):
+
+func _on_message_received(msg):
 	print(msg)
 
 
-func _on_Button_pressed():
+func _on_button_pressed():
 	websocket.send("Hi server")
 	print('cl')
-
-
-

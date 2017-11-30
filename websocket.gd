@@ -1,8 +1,7 @@
 extends StreamPeerTCP
 
-const MAGIC_STRING = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+const MAGIC_STRING = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"  # a fixed websocket thing string
 const USER_AGENT = "Godot-client"
-
 
 const MESSAGE_RECEIVED = "msg_received"
 const BINARY_RECEIVED = "binary_received"
@@ -23,32 +22,32 @@ var receiver_binary_f = null
 var close_listener = Node.new()
 var dispatcher = Reference.new()
 
+
 func _run(_self):
 	###
 	# Handshake
 	###
 	var tm = 0.0
-	
+
 	# connect
 	while true:
-		if get_status()==STATUS_ERROR:
+		if get_status() == STATUS_ERROR:
 			error = 'Connection fail'
 			return
-		if get_status()==STATUS_CONNECTED:
+		if get_status() == STATUS_CONNECTED:
 			break
 		tm += 0.1
 		if tm>TIMEOUT:
 			error = 'Connection timeout'
 			return
 		OS.delay_msec(100)
-	
+
 	var _host = self.host
 	if self.port != 80:
 		_host += ':' + str(self.port)
 	var header = ''
 	var data = ''
-	
-	
+
 	header  = "GET /"+self.path+" HTTP/1.1\r\n"
 	header += "Host: "+self.host_only+"\r\n"
 	header += "Connection: Upgrade\r\n"
@@ -65,8 +64,8 @@ func _run(_self):
 	header += "Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits\r\n"
 	header += "\r\n"
 	#print(header)
-	
-	if OK!=put_data( header.to_ascii() ):
+
+	if OK != put_data(header.to_ascii()):
 		print('error sending handshake headers')
 		return
 
@@ -74,12 +73,12 @@ func _run(_self):
 	tm = 0.0
 	var start_read = false
 	while true:
-		if get_available_bytes()>0 and not start_read:
+		if get_available_bytes() > 0 and not start_read:
 			data += get_string(get_available_bytes())
 			start_read = true
-		elif get_available_bytes()==0 and start_read:
+		elif get_available_bytes() == 0 and start_read:
 			break
-		
+
 		OS.delay_msec(100)
 		tm += 0.1
 		if tm>TIMEOUT:
@@ -89,15 +88,15 @@ func _run(_self):
 
 	var connection_ok = false
 	for lin in data.split("\n"):
-		if lin.find("HTTP/1.1 101")>-1:
+		if lin.find("HTTP/1.1 101") > -1:
 			connection_ok = true
-		# other headers can by cheched here
-	
+		# other headers can be checked here
+
 	if not connection_ok:
 		#print(data)
 		print("Not connection ok")
 		return
-	
+
 	data = ''
 	var is_reading_frame = false
 	var size = 0
@@ -105,7 +104,7 @@ func _run(_self):
 	var fin = 0
 	var opcode = 0
 	while is_connected():
-		if get_available_bytes()>0:
+		if get_available_bytes() > 0:
 			if not is_reading_frame:
 				# frame
 				byte = get_8()
@@ -118,7 +117,7 @@ func _run(_self):
 				#printt(fin,mskd,opcode,payload)
 				#if fin:
 				#data += get_string(get_available_bytes())
-				if payload<126:
+				if payload < 126:
 					# size of data = payload
 					data += get_string(payload)
 					if fin:
@@ -127,11 +126,11 @@ func _run(_self):
 						data = ''
 				else:
 					size = 0
-					if payload==126:
+					if payload == 126:
 						# 16-bit size
 						size = get_u16()
 						#printt(size,'of data')
-					if get_available_bytes()<size:
+					if get_available_bytes() < size:
 						is_reading_frame = true
 						size -= get_available_bytes()
 						data += get_string(get_available_bytes())
@@ -143,7 +142,7 @@ func _run(_self):
 								dispatcher.emit_signal(MESSAGE_RECEIVED, data)
 							data = ''
 			else:
-				if size<=get_available_bytes():
+				if size <= get_available_bytes():
 					size = 0
 					data += get_string(get_available_bytes())
 					is_reading_frame = false
@@ -154,12 +153,12 @@ func _run(_self):
 				else:
 					size -= get_available_bytes()
 					data += get_string(get_available_bytes())
-		
+
 		# message to send?
-		while messages.size()>0:
+		while messages.size() > 0:
 			var msg = messages[0]
 			messages.pop_front()
-			
+
 			# mount frame
 			var byte = 0x80 # fin
 			byte = byte | 0x01 # text frame
@@ -172,57 +171,63 @@ func _run(_self):
 			for i in range(masked.size()):
 				put_u8(masked[i])
 			print(msg+" sent")
-			
+
 		OS.delay_msec(3)
-	
+
 
 func send(msg):
 	messages.append(msg)
 
 
-func start(host,port,path=null):
+func start(host, port, path=null):
 	self.host_only = host
 	if path == null:
 		self.host = host
 		path = ''
 	else:
-		self.host = host+"/"+path
+		self.host = host + "/" + path
 	self.path = path
 	self.port = port
 	set_big_endian(true)
 	print(IP.get_local_addresses())
-	if OK==connect(IP.resolve_hostname(host),port):
-		thread.start(self,'_run', self)
+	if OK == connect(IP.resolve_hostname(host), port):
+		thread.start(self, '_run', self)
 	else:
 		print('no')
 
-func set_receiver(o,f):
+
+func set_receiver(o, f):
 	if receiver:
 		unset_receiver()
 	receiver = o
 	receiver_f = f
-	dispatcher.connect( MESSAGE_RECEIVED, receiver, receiver_f)
+	dispatcher.connect(MESSAGE_RECEIVED, receiver, receiver_f)
 
-func set_binary_receiver(o,f):
+
+func set_binary_receiver(o, f):
 	if receiver_binary:
 		unset_binary_receiver()
 	receiver_binary = o
 	receiver_binary_f = f
-	dispatcher.connect( MESSAGE_RECEIVED, receiver_binary, receiver_binary_f)
+	dispatcher.connect(MESSAGE_RECEIVED, receiver_binary, receiver_binary_f)
+
 
 func unset_receiver():
-	dispatcher.disconnect( MESSAGE_RECEIVED, receiver, receiver_f)
+	dispatcher.disconnect(MESSAGE_RECEIVED, receiver, receiver_f)
 	receiver = null
 	receiver_f = null
 
+
 func unset_binary_receiver():
-	dispatcher.disconnect( MESSAGE_RECEIVED, receiver_binary, receiver_binary_f)
+	dispatcher.disconnect(MESSAGE_RECEIVED, receiver_binary, receiver_binary_f)
 	receiver_binary = null
 	receiver_binary_f = null
-	
+
+
 func _init(reference).():
 	dispatcher.add_user_signal(MESSAGE_RECEIVED)
 	dispatcher.add_user_signal(BINARY_RECEIVED)
+
 
 func _mask(_m, _d):
 	_m = int_to_hex(_m)
@@ -231,6 +236,7 @@ func _mask(_m, _d):
 	for i in range(_d.size()):
 		ret.append(_d[i] ^ _m[i % 4])
 	return ret
+
 
 func int_to_hex(n):
 	n = var2bytes(n)
